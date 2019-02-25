@@ -1,0 +1,146 @@
+---
+title: "Regression Analysis in Motor Trend Car Road Tests"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+date: "November 1, 2018"
+researcher: Juan Mari Sebastian Carino
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+
+## Executive Summary
+In this analysis, the researcher has investigated which is better for transmission - automatic or manual and the difference between the two. This analysis is based from the 1974 the Motor Trend Car Road Tests and comprises of fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973 - 1974 models). The analysis will go through the following: discussion and presentation of descriptive statistics, conducting the initial regression model, diagnostic tests for the initial regression model (tests conducted are: test for multicollinearity, test for heteroskedasticity, and test for overfitting/underfitting), and presentation of the final model along with conclusions. The result of the analysis showed that manual transmission is better than automatic transmission. 
+
+## Descriptive Statistics
+Our dataset, mtcars is composed of 32 observations and 11 variables. A summary information about the data is illustrated showing the min values, max values, and values at 1st quarter, 3rd quarter, and median. 
+```{r summary}
+summary(mtcars)
+```
+It can be observed that variables, vs and am which are discrete has a mean below the 50th percentile. This tells that most of the observations have discrete values 0. Other variables aside from the mentioned earlier are continuous. 
+
+## Initial Modelling
+The initial regression model would include variable, mpg (miles per gallon) as our dependent variable and the rest of other variables as our independent variables. A diagnotic tests will follow after the initial modelling. 
+```{r initial model}
+fit0 <- lm(mpg ~., mtcars )
+summary(fit0)
+```
+
+Based on the initial regression, the variables, cyl (number of cylinder), hp (gross horsepower), wt (weight in 1000 lbs), and carb (number of carburetors) have negative estimated coefficients. This tells a negative relationship to our dependent variable. 
+Our adjusted R-squared is 80.66%. This tells that the variation in our model is explained by 80.66%. This is considered to be a good indicator that our model is good and able to explain our dependent variable. 
+
+## Diagnostics 
+To get the final model, a series of diagnostic tests is conducted. This tests include: test for heteroskedasticity, variance inflation factor, and test for overfitting/underfitting. 
+
+### Variance Inflation Factor
+Under this test, the researcher has tested the model for any potential variance inflation factor. Variance inflation factor tells if the variance of an explanatory variable is inflated due to the high correlation to other explanatory variable(s). The goal in this test is to check our model for multicollinearity and to remove variables which have high variance inflation factor. 
+
+In the next figure, the researcher has presented the correlation table of the model. 
+```{r correlation}
+# Perform correlation
+      cor(mtcars)
+```
+
+In the correlation table, it can be seen that most of the correlation values among variables range from 0.50 to 0.90 (or -0.50 to -0.90). High correlation can tell that variance inflation is present in our model. Now, a variance inflation factor test is conducted.  If a variable's VIF is 10 or greater, it would imply the presence of severe multicollinearity and the researcher will exclude those variables in the model
+```{r vif}
+# Load the library for variance inflation factor
+      library(car)
+
+# Calculation of variance inflation factor
+      vif(lm(mpg ~., mtcars))
+```
+
+The result of our test shows that cyl, disp, and wt have the highest variance. We will remove the variable with the highest vif (which in our case, disp) and perform again the VIF to see if the variance inflation has dropped upon the removal of the variable, disp.
+
+```{r vif 2}
+# Second run of VIF
+      vif(lm(mpg ~. -disp, mtcars))
+```
+
+In our second run of VIF, the variance of the variance has dropped. We will consider removing variable cyl since its VIF is greater than 10. 
+```{r }
+# Third run of VIF
+      vif(lm(mpg ~. -disp -cyl, mtcars))
+```
+
+It can now be observed that the VIF of our variables have dramatically changed due to the removal of variables with high VIF. Our model will now include explanatory variables: hp, drat, wt, qsec, vs, am, gear, and carb. 
+
+#### Test for Overfitting/Underfitting 
+This diagnostic test will show if inclusion or exclusion of explanatory variables has an impact in the model that would cause it to be overfitted or underfitted. In this test, the researcher will check the estimated coefficients and adjusted R-squared and see the impact of inclusion of explanatory variables. The goal in this test is to find the best fit for the model. 
+
+We will based our test for overfitting/underfitting based on their correlation to mpg - in descending order (from the highest positive correlation to the highest negative correlation). 
+```{r cor 2}
+# Perform correlation
+      cor(mtcars)[,1]
+```
+
+```{r over/under}
+# Coding the regression models
+      fitA <- lm(mpg ~ drat, mtcars)
+      fitB <- lm(mpg ~ drat + vs, mtcars)
+      fitC <- lm(mpg ~ drat + vs + am, mtcars )
+      fitD <- lm(mpg ~ drat + vs + am + gear, mtcars)
+      fitE <- lm(mpg ~ drat + vs + am + gear + qsec, mtcars)
+      fitF <- lm(mpg ~ drat + vs + am + gear + qsec + carb, mtcars)
+      fitG <- lm(mpg ~ drat + vs + am + gear + qsec + carb + hp, mtcars)
+      fitH <- lm(mpg ~ drat + vs + am + gear + qsec + carb + hp + wt, mtcars)
+
+# Comparing the estimated coefficients 
+      list(coef(fitA), coef(fitB), coef(fitC), coef(fitD), coef(fitE), coef(fitF), coef(fitG), coef(fitH))
+      
+# Comparing the adjusted R-squared
+      list(summary(fitA)$adj.r.squared, summary(fitB)$adj.r.squared, summary(fitC)$adj.r.squared, summary(fitD)$adj.r.squared, summary(fitE)$adj.r.squared, summary(fitF)$adj.r.squared, summary(fitG)$adj.r.squared, summary(fitH)$adj.r.squared)
+```
+
+In the estimated coefficients, the signs and values change as variables are added to the model. Though the signs and values change, the adjusted R-squared increases which means that the variation explained in the model increases as variables are added. The changes in signs and values may prove that as we add variables to the regression model, we are getting closer to finding the true value for our explanatory variables. 
+
+#### Test for Heteroskedasticity
+Heteroskedasticity is defined as the nonlinearity behavior of variance in the model. According to statsmakemecry website, heteroskedasticity refers to the circumstance in which the variability of a variable is unequal across the range of values of a second variable that predicts it. 
+The researcher has used Breusch Pagan Test for Heteroskedasticity. Below is the results of the test.
+```{r heteroskedasticity}
+# Load the library
+      library(olsrr)
+
+# Perform the test for Heteroskedasticity
+      ols_test_breusch_pagan(fitH)
+```
+
+In this test, the researcher has looked on the p-value. If the p-value is less than 0.05, then we fail to reject the null hypothesis. Based from the results, the p-value is 0.0832 which is more than 0.05. This concludes that our model is not heteroskedastic. 
+
+## Final Model & Conclusion
+Now that the diagnostic tests for our model is done, this leads to the final model which is fitH. Based from our diagnostic test, our final regression model is not heteroskedastic; variance inflation is eliminated with tolerance VIF level of less than 10; and the fit in our model is the most optimal and best fit based from the test for overfitting/underfitting. The summary of our final regression model is shown below. 
+
+```{r final model}
+summary(fitH)
+```
+
+Now, to answer the research questions:
+
+1. Is an automatic or manual transmission better for MPG?
+2. Quantify the MPG difference between automatic and manual transmissions. 
+
+Since R recognizes categorical or factor variables in ascending order (0 first, then 1) then, we interpret that the value of intercept is the value of the automatic transmission given the other variables held constant. The coefficient value of am refers to the distance between manual and automatic. Thus, to get the value of automatic transmission, add the intercept and coefficient value of am. 
+
+The value of automatic transmission is `r coef(fitH)[1]` and the value of manual transmission is `r coef(fitH)[1] + coef(fitH)[4]`. This tells that manual transmission is better performing than automatic transmission when it comes to mpg or gas consumption. This is true because automatic transmission cars consumed more gallons because their torque converter was always slipping and the transmission took a fair amount of energy to run. That is why, manual transmission was preferred because consumers had more fuel savings. 
+But this conclusion may not be anymore applicable in the present because the time gap between the present and the dataset was gathered is huge and that technology has evolved a lot. This further provides that continuous improvement to automatic cars have been developed including fuel consumption reduction. When the time came, automatic cars would be at par with manual transmission in terms of fuel consumption. 
+
+
+Lastly, the researcher presents the various plot of the final model. 
+The first plot is residuals vs fitted. The observations are somewhat near 0 and the red line is nonlinear. Therefore, our conclusion that the model is not heteroskedastic is true. 
+
+The second plot is normal Q-Q plot. A Q-Q plot is a graphical technique for determining if two data sets come from populations with a common distribution according to itl website. It can be observed that the standardized residuals lie along the broken lines in our plot. This means to tell that the distribution of the population is normal. 
+
+The third plot is scale location plot. Scale location plot, according to data library virginia website, shows if residuals are spread equally along the ranges of predictors. In our plot, it can be seen that the data points are scattered and that the red line is upward. Because there is no pattern, the residuals are randomly spread. 
+
+The fourth plot is residuals vs leverage. This helps us identify and look influential cases. Influential cases or data points are those data points which have an unusually large effect on our regression analysis. Our analysis entails to check if the data points are within the cook's distance or not. If they are within the cook's distance, then the conclusion is there is no influential cases. In our data, data points are within the cook's distance hence, no influential cases in our model. 
+
+## Appendix 
+```{r }
+# Plot the model
+      plot(fitH)
+```
