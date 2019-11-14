@@ -638,15 +638,19 @@ summary(fit0)</code></pre>
 
       plot(fitH)</code></pre>
 
+![png](https://github.com/jmsebastiancarino/Regression-Analysis-in-Motor-Trend-Car-Road-Tests/blob/master/Residuals%20vs%20Fitted.png)
+
+![png](https://github.com/jmsebastiancarino/Regression-Analysis-in-Motor-Trend-Car-Road-Tests/blob/master/Residuals%20vs%20Leverage.png)
+
+![png](https://github.com/jmsebastiancarino/Regression-Analysis-in-Motor-Trend-Car-Road-Tests/blob/master/Normal%20Q-Q%20Plot.png)
+
+![png](https://github.com/jmsebastiancarino/Regression-Analysis-in-Motor-Trend-Car-Road-Tests/blob/master/Scale%20Location.png)
+
 
 
 </div>
 
 
-![png](Residuals vs Fitted.png)
-![png](Normal Q-Q plot.png)
-![png](Residuals vs Leverage.png)
-![png](Scale Location.png)
 
 
 
