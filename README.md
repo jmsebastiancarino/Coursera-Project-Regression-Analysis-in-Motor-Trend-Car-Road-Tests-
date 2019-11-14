@@ -24,44 +24,6 @@
 
 
 
-<title>Regression Analysis in Motor Trend Car Road Tests</title>
-
-
-
-<style type="text/css">code{white-space: pre;}</style>
-
-<style type="text/css">
-
-  pre:not([class]) {
-
-    background-color: white;
-
-  }
-
-</style>
-
-<script type="text/javascript">
-
-if (window.hljs) {
-
-  hljs.configure({languages: []});
-
-  hljs.initHighlightingOnLoad();
-
-  if (document.readyState && document.readyState === "complete") {
-
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-
-  }
-
-}
-
-</script>
-
-
-
-
-
 
 
 <style type="text/css">
